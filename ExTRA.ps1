@@ -68,7 +68,7 @@ try {
             $pageContent = $pageContent.Replace("var exchange2016Tags = [];", "var exchange2016Tags = $ex2016Tags;")
             $pageContentUTF8 = [System.Text.Encoding]::UTF8.GetBytes($pageContent)
             $context.Response.StatusCode = 200
-            $context.Response.OutputStream.Write($pageContentUTF8)
+            $context.Response.OutputStream.Write($pageContentUTF8, 0, $pageContentUTF8.Length)
             $context.Response.Close()
         }
         elseif ($context.Request.HttpMethod -eq "POST") {
