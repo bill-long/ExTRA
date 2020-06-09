@@ -119,9 +119,17 @@ if (Test-Path $outputPath) {
     $choice = Read-Host "Would you like to start an ExTRA with the current settings? (y/n) "
 
     if ($choice -eq "y") {
-        & logman create trace ExchangeDebugTraces -p { 79bb49e6-2a2c-46e4-9167-fa122525d540 } -o c:\tracing\trace.etl -ow -f bin -max 1024
+        Copy-Item $outputPath C:\EnabledTraces.config -Force
 
-        Write-Host "The trace is running. To stop the trace run the following command:"
+        $collectorExistsTest = & logman query ExchangeDebugTraces
+        if ($collectorExistsTest -match "not found") {
+            & cmd /c "logman create trace ExchangeDebugTraces -p {79bb49e6-2a2c-46e4-9167-fa122525d540} -o c:\tracing\trace.etl -ow -f bin -max 1024"
+        }
+
+        & logman start ExchangeDebugTraces
+
+        Write-Host
+        Write-Host "To stop the trace run the following command:"
         Write-Host "logman stop ExchangeDebugTraces"
     }
 }
