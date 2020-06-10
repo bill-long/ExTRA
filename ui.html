@@ -53,10 +53,46 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(exchange2016Tags)
+                body: JSON.stringify(exchange2016Tags, ['name', 'isSelected', 'tags'])
             });
 
             window.close();
+        }
+
+        function setSelectedOnCategory(category, selected) {
+            if (category.isSelected !== selected) {
+                category.isSelected = selected;
+
+                category.tags.forEach(t => setSelectedOnTag(t, selected, false));
+
+                if (category.element.checked !== selected) {
+                    category.element.checked = selected;
+                }
+            }
+        }
+
+        function setSelectedOnTag(tag, selected, updateCategoryState) {
+            if (tag.isSelected !== selected) {
+                tag.isSelected = selected;
+                if (tag.element.checked !== selected) {
+                    tag.element.checked = selected;
+                }
+
+                if (updateCategoryState) {
+                    checkCategorySelectionState(tag.category);
+                }
+            }
+        }
+
+        function checkCategorySelectionState(category) {
+            let shouldBeSelected = category.tags.filter(t => t.isSelected).length === category.tags.length;
+            if (category.isSelected !== shouldBeSelected) {
+                category.isSelected = shouldBeSelected;
+            }
+
+            if (category.element.checked !== shouldBeSelected) {
+                category.element.checked = shouldBeSelected;
+            }
         }
 
         function showTags() {
@@ -79,7 +115,7 @@
                         tagElement.id = category.name + tag.name;
                         tagElement.className = "tag";
                         tagElement.type = "checkbox";
-                        tagElement.oninput = (event) => { tag.isSelected = event.srcElement.checked; showTags(); };
+                        tagElement.oninput = (event) => setSelectedOnTag(tag, event.srcElement.checked, true);
                         tagElement.checked = tag.isSelected;
 
                         let labelElement = document.createElement("label");
@@ -90,6 +126,9 @@
                         tagDiv.appendChild(labelElement);
 
                         tagElements.push(tagDiv);
+
+                        tag.element = tagElement;
+                        tag.category = category;
                     }
                 });
 
@@ -100,11 +139,7 @@
                     categoryElement.id = category.name;
                     categoryElement.className = "category";
                     categoryElement.type = "checkbox";
-                    categoryElement.oninput = (event) => {
-                        category.tags.forEach(t => t.isSelected = event.srcElement.checked);
-                        category.isSelected = event.srcElement.checked;
-                        showTags();
-                    };
+                    categoryElement.oninput = (event) => setSelectedOnCategory(category, event.srcElement.checked);
                     categoryElement.checked = category.tags.filter(t => t.isSelected).length === category.tags.length;
 
                     let labelElement = document.createElement("label");
@@ -116,6 +151,8 @@
 
                     newChildElements.push(categoryDiv);
                     tagElements.forEach(t => newChildElements.push(t));
+
+                    category.element = categoryElement;
                 }
             });
 
