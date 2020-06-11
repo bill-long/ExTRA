@@ -62,6 +62,23 @@ try {
 
         $context = $task.GetAwaiter().GetResult()
 
+        if ($context.Request.HttpMethod -eq "PUT") {
+            $context.Response.StatusCode = 200
+            $context.Response.Close()
+
+            # The user might have closed the tab, or might have clicked Refresh.
+            # They both fire the same event. So, wait a moment and see if we get
+            # another request. If we don't, tab was closed.
+            $task = $httpListener.GetContextAsync()
+            if (-not $task.AsyncWaitHandle.WaitOne(1000)) {
+                Write-Host "Browser tab was closed without saving changes."
+                break
+            }
+            else {
+                $context = $task.GetAwaiter().GetResult()
+            }          
+        }
+
         if ($context.Request.HttpMethod -eq "GET") {
             Write-Host "Showing tag selector UI in the default browser."
             $pageContent = [IO.File]::ReadAllText("$PSScriptRoot\ui.html")
@@ -70,10 +87,6 @@ try {
             $context.Response.StatusCode = 200
             $context.Response.OutputStream.Write($pageContentUTF8, 0, $pageContentUTF8.Length)
             $context.Response.Close()
-        }
-        elseif ($context.Request.HttpMethod -eq "PUT") {
-            Write-Host "Browser tab was closed without saving changes."
-            break
         }
         elseif ($context.Request.HttpMethod -eq "POST") {
             $reader = New-Object System.IO.StreamReader($context.Request.InputStream, "UTF8")
