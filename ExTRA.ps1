@@ -71,6 +71,10 @@ try {
             $context.Response.OutputStream.Write($pageContentUTF8, 0, $pageContentUTF8.Length)
             $context.Response.Close()
         }
+        elseif ($context.Request.HttpMethod -eq "PUT") {
+            Write-Host "Browser tab was closed without saving changes."
+            break
+        }
         elseif ($context.Request.HttpMethod -eq "POST") {
             $reader = New-Object System.IO.StreamReader($context.Request.InputStream, "UTF8")
             $body = $reader.ReadToEnd()

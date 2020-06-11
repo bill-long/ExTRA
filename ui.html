@@ -160,6 +160,12 @@
             checkboxesDiv.innerHTML = "";
             newChildElements.forEach(c => checkboxesDiv.appendChild(c));
         }
+
+        window.onbeforeunload = () => {
+            fetch(window.location.href, {
+                method: 'PUT'
+            });
+        };
     </script>
 
 </html>
