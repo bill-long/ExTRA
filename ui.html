@@ -12,8 +12,13 @@
             margin-top: 20px;
         }
 
-        .tag {
+        .tag-grid {
             margin-left: 100px;
+            column-count: 3;
+        }
+
+        .tag {
+            width: 100%;
         }
 
         .hidden {
@@ -22,6 +27,10 @@
 
         .toolbar {
             margin-top: 20px;
+        }
+
+        label {
+            color: black;
         }
     </style>
 </head>
@@ -39,7 +48,8 @@
                 <label for="tagFilter" class="active">Tag Filter</label>
             </div>
             <label for="showOnlySelectedCheckbox" class="col s3">
-                <input id="showOnlySelectedCheckbox" type="checkbox" onchange="updateVisibility(event)" />
+                <input id="showOnlySelectedCheckbox" class="filled-in" type="checkbox"
+                    onchange="updateVisibility(event)" />
                 <span>Only Show Selected</span>
             </label>
             <button class="btn waves-effect waves-light col s3" onclick="save()">Save</button>
@@ -155,7 +165,8 @@
                 let newChildElements = [];
 
                 exchange2016Tags.forEach(category => {
-                    let tagElements = [];
+                    let tagGrid = document.createElement("div");
+                    tagGrid.className = "tag-grid";
 
                     category.tags.forEach(tag => {
                         let tagDiv = document.createElement("div");
@@ -164,6 +175,7 @@
                         let tagElement = document.createElement("input");
                         tagElement.id = category.name + tag.name;
                         tagElement.type = "checkbox";
+                        tagElement.className = "filled-in";
                         tagElement.oninput = (event) => setSelectedOnTag(tag, event.srcElement.checked, true);
                         tagElement.checked = tag.isSelected;
 
@@ -177,7 +189,7 @@
                         labelElement.appendChild(spanElement);
                         tagDiv.appendChild(labelElement);
 
-                        tagElements.push(tagDiv);
+                        tagGrid.appendChild(tagDiv);
 
                         tag.element = tagElement;
                         tag.category = category;
@@ -189,6 +201,7 @@
 
                     let categoryElement = document.createElement("input");
                     categoryElement.type = "checkbox";
+                    categoryElement.className = "filled-in";
                     categoryElement.oninput = (event) => setSelectedOnCategory(category, event.srcElement.checked);
                     categoryElement.checked = category.tags.filter(t => t.isSelected).length === category.tags.length;
 
@@ -203,7 +216,7 @@
                     categoryDiv.appendChild(labelElement);
 
                     newChildElements.push(categoryDiv);
-                    tagElements.forEach(t => newChildElements.push(t));
+                    newChildElements.push(tagGrid);
 
                     category.element = categoryElement;
                 });
