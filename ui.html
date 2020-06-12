@@ -106,10 +106,9 @@
 
                     if (updateCategoryState) {
                         checkCategorySelectionState(tag.category);
-                    }
-
-                    if (document.getElementById('showOnlySelectedCheckbox').checked) {
-                        updateVisibility();
+                        if (document.getElementById('showOnlySelectedCheckbox').checked) {
+                            updateVisibility();
+                        }
                     }
                 }
             }
