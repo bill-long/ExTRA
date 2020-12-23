@@ -1,3 +1,7 @@
+param(
+    [switch]$ShowCommandsOnly
+)
+
 $uri = "http://localhost:5002/"
 
 $outputPath = Join-Path $PSScriptRoot "EnabledTraces.config"
@@ -23,6 +27,18 @@ function GetTagsFromFile($file) {
     }
 
     return $tags
+}
+
+function ShowCommands {
+    Write-Host ("Create the data collector:`r`n`t logman create trace ExchangeDebugTraces -p {79bb49e6-2a2c-46e4-9167-fa122525d540} -o c:\tracing\trace.etl -ow -f bin -max 1024")
+    Write-Host ("Start the data collector:`r`n`t logman start ExchangeDebugTraces")
+    Write-Host ("Stop the data collector:`r`n`t logman start ExchangeDebugTraces")
+}
+
+if ($ShowCommandsOnly)
+{
+    ShowCommands
+    return
 }
 
 $ex2016Tags = GetTagsFromFile "$PSScriptRoot\tags2016.txt"
@@ -132,21 +148,4 @@ finally {
     $httpListener.Close()
 }
 
-if (Test-Path $outputPath) {
-    $choice = Read-Host "Would you like to start an ExTRA with the current settings? (y/n) "
-
-    if ($choice -eq "y") {
-        Copy-Item $outputPath C:\EnabledTraces.config -Force
-
-        $collectorExistsTest = & logman query ExchangeDebugTraces
-        if ($collectorExistsTest -match "not found") {
-            & cmd /c "logman create trace ExchangeDebugTraces -p {79bb49e6-2a2c-46e4-9167-fa122525d540} -o c:\tracing\trace.etl -ow -f bin -max 1024"
-        }
-
-        & logman start ExchangeDebugTraces
-
-        Write-Host
-        Write-Host "To stop the trace run the following command:"
-        Write-Host "logman stop ExchangeDebugTraces"
-    }
-}
+ShowCommands
